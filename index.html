@@ -3,148 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>डिजिटल मेनु - रेस्टुरेन्ट</title>
+  <title>मेनु - स्वागत छ</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-gray-100 pb-24">
+<body class="bg-gray-50 min-h-screen">
 
-  <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg">
-    <div class="bg-green-700 text-white p-6 rounded-b-3xl text-center sticky top-0 z-50">
-      <h1 class="text-2xl font-bold">🍽️ हाम्रो डिजिटल मेनु</h1>
-      <p class="mt-2 bg-green-800 inline-block px-4 py-1 rounded-full text-sm font-semibold">
-        टेबल नम्बर: <span id="tableNo" class="text-yellow-300 text-base">१०</span>
-      </p>
-    </div>
+<div class="max-w-md mx-auto p-4">
+  <h1 class="text-3xl font-bold text-center text-green-700 mb-2">🍽️ हाम्रो मेनु</h1>
+  <p class="text-center text-gray-600">टेबल नं: <span id="tableNo" class="font-bold text-2xl"></span></p>
 
-    <div class="p-4 space-y-4" id="menu-container">
-      <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border">
-        <div>
-          <h3 class="font-bold text-gray-800 text-lg">चिकेन मःम</h3>
-          <p class="text-xs text-gray-500">१ प्लेट (१० पिस)</p>
-          <p class="font-extrabold text-green-700 mt-1">रु. १८०</p>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button onclick="changeQty(1, -1)" class="bg-gray-200 text-gray-800 w-8 h-8 rounded-full font-bold">-</button>
-          <span id="qty-1" class="font-bold text-lg w-6 text-center">0</span>
-          <button onclick="changeQty(1, 1)" class="bg-green-600 text-white w-8 h-8 rounded-full font-bold">+</button>
-        </div>
-      </div>
+  <div id="menu" class="space-y-4 mt-8"></div>
 
-      <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border">
-        <div>
-          <h3 class="font-bold text-gray-800 text-lg">भेज चाउमिन</h3>
-          <p class="text-xs text-gray-500">१ प्लेट</p>
-          <p class="font-extrabold text-green-700 mt-1">रु. १२०</p>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button onclick="changeQty(2, -1)" class="bg-gray-200 text-gray-800 w-8 h-8 rounded-full font-bold">-</button>
-          <span id="qty-2" class="font-bold text-lg w-6 text-center">0</span>
-          <button onclick="changeQty(2, 1)" class="bg-green-600 text-white w-8 h-8 rounded-full font-bold">+</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white p-4 shadow-lg rounded-t-3xl border-t">
-      <div class="flex justify-between items-center mb-3 px-2">
-        <span class="text-gray-600 font-medium">कुल रकम:</span>
-        <span id="total-price" class="text-xl font-black text-green-700">रु. ०</span>
-      </div>
-      <button onclick="placeOrder()" id="orderBtn" class="w-full bg-green-700 text-white py-4 rounded-2xl text-lg font-bold">
-        🚀 अर्डर पठाउनुहोस् (<span id="total-items">०</span> आइटम)
-      </button>
-    </div>
+  <div class="fixed bottom-6 left-4 right-4">
+    <button onclick="placeOrder()" class="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-2xl text-xl font-bold shadow-lg">
+      Order Place गर्नुहोस् (<span id="orderCount">0</span>)
+    </button>
   </div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script>
+// ==================== यहाँ तपाईंको Firebase Config राख्नुहोस् ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  authDomain: "your-project-id.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project-id.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:xxxxxxxxxxxxxxxxxxxxxxxx"
+};
+// =============================================================================
 
-    // तपाईंको फायरबेस कन्फिगरेसन
-    const firebaseConfig = {
-      apiKey: "AIzaSyAohDLMyfCo0Mivw99agloetfxPYrRcHPo",
-      authDomain: "my-restaurant-qr.firebaseapp.com",
-      projectId: "my-restaurant-qr",
-      storageBucket: "my-restaurant-qr.firebasestorage.app",
-      messagingSenderId: "67721943429",
-      appId: "1:67721943429:web:392ec74551af0ef67a0cec"
-    };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+let currentTable = "1";
+let cart = [];
 
-    // Global Functions to make them accessible outside module
-    window.products = {
-      1: { name: "चिकेन मःम", price: 180, qty: 0 },
-      2: { name: "भेज चाउमिन", price: 120, qty: 0 }
-    };
+// URL बाट टेबल नम्बर लिनुहोस्
+const params = new URLSearchParams(window.location.search);
+currentTable = params.get('table') || '1';
+document.getElementById('tableNo').innerText = currentTable;
 
-    const params = new URLSearchParams(window.location.search);
-    window.tableNumber = params.get('table') || '१०';
-    document.getElementById('tableNo').innerText = window.tableNumber;
+// Sample Menu (तपाईंले थप्न सक्नुहुन्छ)
+const menuItems = [
+  {id:1, name:"चिकेन मो:मो", price:180, desc:"६ पिस"},
+  {id:2, name:"भेज मो:मो", price:160, desc:"६ पिस"},
+  {id:3, name:"चिकेन चिल्ली", price:220, desc:"प्लेट"},
+  {id:4, name:"कोक / फेन्टा", price:60, desc:"५००ml"},
+  {id:5, name:"फ्राइड राइस", price:180, desc:"चिकेन"},
+];
 
-    window.changeQty = function(id, amount) {
-      if (window.products[id].qty + amount >= 0) {
-        window.products[id].qty += amount;
-        document.getElementById(`qty-${id}`).innerText = window.products[id].qty;
-        updateSummary();
-      }
-    }
+function renderMenu() {
+  const container = document.getElementById('menu');
+  container.innerHTML = menuItems.map(item => `
+    <div class="bg-white p-4 rounded-2xl shadow flex justify-between items-center">
+      <div>
+        <h3 class="font-semibold">${item.name}</h3>
+        <p class="text-sm text-gray-500">${item.desc}</p>
+      </div>
+      <div class="text-right">
+        <p class="font-bold text-lg">₹${item.price}</p>
+        <button onclick="addItem(${item.id})" class="mt-2 bg-green-600 text-white px-5 py-1 rounded-xl text-sm">थप्नुहोस्</button>
+      </div>
+    </div>
+  `).join('');
+}
 
-    function updateSummary() {
-      let totalItems = 0;
-      let totalPrice = 0;
-      for (let id in window.products) {
-        totalItems += window.products[id].qty;
-        totalPrice += window.products[id].qty * window.products[id].price;
-      }
-      document.getElementById('total-items').innerText = totalItems;
-      document.getElementById('total-price').innerText = "रु. " + totalPrice;
-    }
+function addItem(id) {
+  const item = menuItems.find(i => i.id === id);
+  cart.push({...item, qty: 1});
+  document.getElementById('orderCount').innerText = cart.length;
+}
 
-    window.placeOrder = async function() {
-      let finalOrder = [];
-      for (let id in window.products) {
-        if (window.products[id].qty > 0) {
-          finalOrder.push({
-            name: window.products[id].name,
-            qty: window.products[id].qty,
-            price: window.products[id].price
-          });
-        }
-      }
+async function placeOrder() {
+  if(cart.length === 0) return alert("कृपया केही आइटम थप्नुहोस्");
 
-      if (finalOrder.length === 0) {
-        alert("❌ कृपया पहिले मेनुबाट केही आइटम थप्नुहोस्!");
-        return;
-      }
+  const orderData = {
+    table: currentTable,
+    items: cart,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    status: "new",
+    total: cart.reduce((sum, i) => sum + i.price, 0)
+  };
 
-      const btn = document.getElementById('orderBtn');
-      btn.disabled = true;
-      btn.innerText = "पठाउँदै...";
+  await db.collection("orders").add(orderData);
+  
+  alert("✅ Order सफलतापूर्वक पठाइयो!\nकाउन्टरले चाँडै तयार पार्छ।");
+  cart = [];
+  document.getElementById('orderCount').innerText = 0;
+}
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-      try {
-        // Firebase Firestore मा डेटा सेभ गर्ने
-        await addDoc(collection(db, "orders"), {
-          table: window.tableNumber,
-          items: finalOrder,
-          status: "Pending",
-          createdAt: serverTimestamp()
-        });
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAohDLMyfCo0Mivw99agloetfxPYrRcHPo",
+  authDomain: "my-restaurant-qr.firebaseapp.com",
+  databaseURL: "https://my-restaurant-qr-default-rtdb.firebaseio.com",
+  projectId: "my-restaurant-qr",
+  storageBucket: "my-restaurant-qr.firebasestorage.app",
+  messagingSenderId: "67721943429",
+  appId: "1:67721943429:web:392ec74551af0ef67a0cec",
+  measurementId: "G-JVX1VGNQPB"
+};
 
-        alert("✅ अर्डर सफलतापूर्वक काउन्टरमा पठाइयो!");
-        
-        // Reset quantities
-        for (let id in window.products) { window.products[id].qty = 0; document.getElementById(`qty-${id}`).innerText = 0; }
-        updateSummary();
-
-      } catch (error) {
-        console.error("Error sending order: ", error);
-        alert("❌ अर्डर पठाउन सकिएन। फायरबेसको Rules चेक गर्नुहोस्।");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "🚀 अर्डर पठाउनुहोस् (० आइटम)";
-      }
-    }
-  </script>
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+renderMenu();
+</script>
 </body>
 </html>
