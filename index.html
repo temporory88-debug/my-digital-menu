@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>हाम्रो डिजिटल मेनु</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 pb-28">
+
+  <div class="bg-green-700 text-white p-5 sticky top-0 z-50 shadow-md">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold">🍔 डिजिटल क्याफे</h1>
+        <p class="text-xs opacity-80">ताजा र मिठो परिकार</p>
+      </div>
+      <div class="bg-white text-green-700 px-4 py-2 rounded-full font-bold shadow">
+        टेबल नं: <span id="tableNo">--</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-md mx-auto p-4 space-y-6">
+    
+    <div>
+      <h2 class="text-lg font-bold text-gray-800 mb-3 border-b-2 border-green-500 pb-1">🥟 मोमो क्याटेगोरी</h2>
+      <div class="space-y-3">
+        <div class="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center">
+          <div>
+            <h3 class="font-semibold text-gray-800">चिकन मो:मो</h3>
+            <p class="text-sm text-gray-500">१० पिस (लोकल स्वाद)</p>
+            <p class="font-bold text-green-700 mt-1">रु. १८०</p>
+          </div>
+          <div id="action-1" class="flex items-center">
+            <button onclick="addToCart(1, 'चिकन मो:मो', 180)" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold transition shadow-sm">थप्नुहोस्</button>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center">
+          <div>
+            <h3 class="font-semibold text-gray-800">भेज मो:मो</h3>
+            <p class="text-sm text-gray-500">१० पिस (ताजा तरकारी)</p>
+            <p class="font-bold text-green-700 mt-1">रु. १३०</p>
+          </div>
+          <div id="action-2" class="flex items-center">
+            <button onclick="addToCart(2, 'भेज मो:मो', 130)" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold transition shadow-sm">थप्नुहोस्</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-lg font-bold text-gray-800 mb-3 border-b-2 border-green-500 pb-1">🍜 चाउमिन र नुडल्स</h2>
+      <div class="space-y-3">
+        <div class="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center">
+          <div>
+            <h3 class="font-semibold text-gray-800">चिकन चाउमिन</h3>
+            <p class="text-sm text-gray-500">फुल प्लेट</p>
+            <p class="font-bold text-green-700 mt-1">रु. १५०</p>
+          </div>
+          <div id="action-3" class="flex items-center">
+            <button onclick="addToCart(3, 'चिकन चाउमिन', 150)" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold transition shadow-sm">थप्नुहोस्</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)] border-t p-4 z-50">
+    <div class="max-w-md mx-auto">
+      <button onclick="viewCart()" id="orderBtn" class="w-full bg-gray-400 text-white py-3 rounded-xl text-lg font-bold transition duration-200 cursor-not-allowed" disabled>
+        Order गर्नुहोस् (० आइटम)
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // तपाईँको फायरबेस कन्फिगरेसन
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJ86I7sLw_4iW1FYnOUVGzJoo3z9n94Zc",
+      authDomain: "menu-daef3.firebaseapp.com",
+      projectId: "menu-daef3",
+      storageBucket: "menu-daef3.firebasestorage.app",
+      messagingSenderId: "253545341756",
+      appId: "1:253545341756:web:b52f94c9de580e5f657439",
+      measurementId: "G-S43DRK2C94"
+    };
+
+    // Firebase Initialize गर्ने
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let cart = {};
+    
+    const params = new URLSearchParams(window.location.search);
+    const tableNum = params.get('table') || '१';
+    document.getElementById('tableNo').innerText = tableNum;
+
+    window.addToCart = function(id, name, price) {
+      if (cart[id]) {
+        cart[id].qty += 1;
+      } else {
+        cart[id] = { name: name, price: price, qty: 1 };
+      }
+      updateOrderButton();
+      renderItemButtons(id, name, price);
+    }
+
+    window.removeFromCart = function(id, name, price) {
+      if (cart[id]) {
+        cart[id].qty -= 1;
+        if (cart[id].qty <= 0) {
+          delete cart[id];
+        }
+      }
+      updateOrderButton();
+      renderItemButtons(id, name, price);
+    }
+
+    function renderItemButtons(id, name, price) {
+      const container = document.getElementById(`action-${id}`);
+      if (!container) return;
+
+      if (cart[id] && cart[id].qty > 0) {
+        container.innerHTML = `
+          <button onclick="removeFromCart(${id}, '${name}', ${price})" class="bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition shadow-sm">-</button>
+          <span class="mx-3 font-bold text-gray-800 text-lg">${cart[id].qty}</span>
+          <button onclick="addToCart(${id}, '${name}', ${price})" class="bg-green-600 hover:bg-green-700 text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition shadow-sm">+</button>
+        `;
+      } else {
+        container.innerHTML = `
+          <button onclick="addToCart(${id}, '${name}', ${price})" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold transition shadow-sm">थप्नुहोस्</button>
+        `;
+      }
+    }
+
+    function updateOrderButton() {
+      let totalItems = 0;
+      let totalPrice = 0;
+      
+      for (let id in cart) {
+        totalItems += cart[id].qty;
+        totalPrice += cart[id].qty * cart[id].price;
+      }
+
+      const btn = document.getElementById('orderBtn');
+      if (totalItems > 0) {
+        btn.innerText = `Order गर्नुहोस् (${totalItems} आइटम - रु.${totalPrice})`;
+        btn.className = "w-full bg-green-700 hover:bg-green-800 text-white py-3 rounded-xl text-lg font-bold transition duration-200 cursor-pointer text-center block shadow-lg shadow-green-700/20";
+        btn.disabled = false;
+      } else {
+        btn.innerText = "Order गर्नुहोस् (० आइटम)";
+        btn.className = "w-full bg-gray-400 text-white py-3 rounded-xl text-lg font-bold transition cursor-not-allowed text-center block";
+        btn.disabled = true;
+      }
+    }
+
+    // अर्डरलाई सिधै Firestore Database मा पठाउने फङ्सन
+    window.viewCart = async function() {
+      const btn = document.getElementById('orderBtn');
+      btn.innerText = "अर्डर पठाउँदै...";
+      btn.disabled = true;
+
+      // अर्डरको डेटा स्ट्रक्चर तयार पार्ने
+      let orderItems = [];
+      let totalPrice = 0;
+      for (let id in cart) {
+        orderItems.push({
+          itemId: id,
+          name: cart[id].name,
+          qty: cart[id].qty,
+          price: cart[id].price,
+          total: cart[id].qty * cart[id].price
+        });
+        totalPrice += cart[id].qty * cart[id].price;
+      }
+
+      try {
+        // Firestore को 'orders' कलेक्सनमा डाटा थप्ने
+        await addDoc(collection(db, "orders"), {
+          tableNumber: tableNum,
+          items: orderItems,
+          totalAmount: totalPrice,
+          status: "pending", // pending, preparing, completed, cancelled
+          createdAt: serverTimestamp()
+        });
+
+        alert("✅ अर्डर सफलतापूर्वक काउन्टरमा पठाइयो!");
+        
+        // कार्ट र UI रिसेट गर्ने
+        for (let id in cart) {
+          const item = cart[id];
+          delete cart[id];
+          renderItemButtons(id, item.name, item.price);
+        }
+        cart = {};
+        updateOrderButton();
+
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        alert("❌ अर्डर पठाउन सकिएन। कृपया इन्टरनेट कनेक्सन जाँच गर्नुहोस् वा काउन्टरमा सिधै भन्नुहोस्।");
+        updateOrderButton();
+      }
+    }
+  </script>
+</body>
+</html>
