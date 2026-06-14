@@ -1,92 +1,279 @@
 <!DOCTYPE html>
 <html lang="ne">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>काउन्टर ड्यासबोर्ड</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moon Light Cafe - Counter</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #C9A84C; --bg: #0a0a0a; --card: #161616;
+    --text: #f0e6c8; --dim: #777;
+    --green: #22c55e; --orange: #f97316; --red: #ef4444; --blue: #3b82f6;
+  }
+  body { background: var(--bg); font-family: 'Poppins', sans-serif; color: var(--text); min-height: 100vh; }
+
+  .topbar { background: #111; border-bottom: 2px solid var(--gold); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: var(--gold); }
+  .live-wrap { display: flex; align-items: center; gap: 8px; }
+  .live-dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)} 70%{box-shadow:0 0 0 8px rgba(34,197,94,0)} }
+  .live-txt { font-size: 12px; color: var(--green); font-weight: 600; }
+  .clock { font-size: 13px; color: var(--dim); }
+
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 16px 16px 0; }
+  .stat { background: var(--card); border: 1px solid #2a2a2a; border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-num { font-size: 26px; font-weight: 700; color: var(--gold); }
+  .stat-lbl { font-size: 10px; color: var(--dim); margin-top: 3px; }
+
+  .filters { display: flex; gap: 8px; padding: 14px 16px 0; flex-wrap: wrap; }
+  .ftab { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid #333; background: var(--card); color: var(--dim); cursor: pointer; transition: all .2s; }
+  .ftab.active { background: var(--gold); color: #000; border-color: var(--gold); }
+
+  .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 12px; padding: 14px 16px 30px; }
+  .empty { text-align: center; padding: 60px 20px; color: var(--dim); grid-column: 1/-1; }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  .order-card { background: var(--card); border-radius: 12px; border: 1px solid #2a2a2a; overflow: hidden; animation: slideIn .3s ease; transition: transform .2s; }
+  .order-card:hover { transform: translateY(-2px); }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  .order-card.new { border-color: var(--orange); }
+  .order-card.preparing { border-color: var(--blue); }
+  .order-card.done { border-color: var(--green); opacity: .65; }
+
+  .card-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #222; }
+  .card-head.new { background: rgba(249,115,22,.1); }
+  .card-head.preparing { background: rgba(59,130,246,.1); }
+  .card-head.done { background: rgba(34,197,94,.1); }
+  .tbl-num { font-size: 17px; font-weight: 700; color: var(--gold); }
+  .ord-id { font-size: 9px; color: var(--dim); margin-top: 1px; }
+  .status-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .s-new { background: var(--orange); color: #fff; }
+  .s-prep { background: var(--blue); color: #fff; }
+  .s-done { background: var(--green); color: #fff; }
+
+  .card-body { padding: 10px 14px; }
+  .ord-row { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 0; }
+  .ord-name { color: var(--text); flex: 1; }
+  .ord-qty { color: var(--dim); margin: 0 6px; }
+  .ord-price { color: var(--gold); font-weight: 600; }
+  .ord-note { background: #1a1400; border: 1px solid #2a2000; border-radius: 6px; padding: 6px 8px; font-size: 10px; color: #f0c060; margin-top: 6px; }
+
+  .card-foot { padding: 8px 14px; border-top: 1px solid #222; display: flex; align-items: center; justify-content: space-between; }
+  .ord-total { font-size: 13px; font-weight: 700; color: var(--gold); }
+  .ord-time { font-size: 9px; color: var(--dim); margin-top: 2px; }
+  .act-btns { display: flex; gap: 5px; }
+  .act-btn { padding: 5px 12px; border-radius: 7px; font-size: 10px; font-weight: 700; border: none; cursor: pointer; font-family: 'Poppins', sans-serif; }
+  .btn-prep { background: var(--blue); color: #fff; }
+  .btn-done { background: var(--green); color: #fff; }
+  .btn-del { background: #2a2a2a; color: var(--dim); }
+
+  .toast { position: fixed; top: 70px; right: 16px; background: var(--orange); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; transform: translateX(120%); transition: transform .3s; z-index: 999; max-width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
+  .toast.show { transform: translateX(0); }
+
+  .bell { font-size: 22px; position: relative; cursor: pointer; }
+  .bell.ring { animation: ring .4s ease 3; }
+  @keyframes ring { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-15deg)} 75%{transform:rotate(15deg)} }
+  .bell-count { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 9px; font-weight: 700; width: 15px; height: 15px; border-radius: 50%; display: none; align-items: center; justify-content: center; }
+  .bell-count.show { display: flex; }
+
+  @media(max-width:600px) {
+    .stats { grid-template-columns: repeat(2,1fr); }
+    .orders-grid { grid-template-columns: 1fr; }
+    .topbar { padding: 10px 14px; }
+  }
+</style>
 </head>
-<body class="bg-gray-100 p-6">
+<body>
 
-<h1 class="text-3xl font-bold text-center mb-8">🛎️ काउन्टर - नयाँ Order हरू</h1>
-<div id="orders" class="max-w-2xl mx-auto space-y-4"></div>
+<div class="topbar">
+  <div>
+    <div class="logo">🌙 Moon Light Cafe</div>
+    <div class="live-wrap" style="margin-top:3px">
+      <span class="live-dot"></span>
+      <span class="live-txt">LIVE Orders</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <span class="clock" id="clock"></span>
+    <div style="position:relative">
+      <span class="bell" id="bell">🔔</span>
+      <span class="bell-count" id="bell-count">0</span>
+    </div>
+  </div>
+</div>
 
-<script>
-// ==================== यहाँ तपाईंको Firebase Config राख्नुहोस् ====================
-const firebaseConfig = {
-  apiKey: "AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:xxxxxxxxxxxxxxxxxxxxxxxx"
-};
-// =============================================================================
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="s-new">0</div><div class="stat-lbl">🔥 नयाँ</div></div>
+  <div class="stat"><div class="stat-num" id="s-prep">0</div><div class="stat-lbl">👨‍🍳 बनाउँदै</div></div>
+  <div class="stat"><div class="stat-num" id="s-done">0</div><div class="stat-lbl">✅ सकियो</div></div>
+  <div class="stat"><div class="stat-num" id="s-rev">Rs.0</div><div class="stat-lbl">💰 आजको</div></div>
+</div>
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+<div class="filters">
+  <div class="ftab active" onclick="setFilter('all',this)">📋 सबै</div>
+  <div class="ftab" onclick="setFilter('new',this)">🔥 नयाँ</div>
+  <div class="ftab" onclick="setFilter('preparing',this)">👨‍🍳 बनाउँदै</div>
+  <div class="ftab" onclick="setFilter('done',this)">✅ सकियो</div>
+</div>
 
-function playNotificationSound() {
-  const audio = new Audio('https://freesound.org/data/previews/66/66929_931655-lq.mp3');
-  audio.play().catch(() => {});
-}
+<div class="orders-grid" id="orders-grid">
+  <div class="empty" id="empty">
+    <div class="empty-icon">📭</div>
+    <div>अहिले कुनै order छैन</div>
+    <div style="font-size:11px;margin-top:6px;color:var(--dim)">Customer ले QR scan गरेपछि यहाँ देखिन्छ</div>
+  </div>
+</div>
 
-db.collection("orders").where("status", "==", "new")
-  .onSnapshot(snapshot => {
-    const container = document.getElementById('orders');
-    container.innerHTML = "";
+<div class="toast" id="toast">
+  <div id="toast-title">🔔 नयाँ Order!</div>
+  <div id="toast-body" style="font-size:11px;margin-top:3px;font-weight:400"></div>
+</div>
 
-    snapshot.forEach(doc => {
-      const order = doc.data();
-      playNotificationSound();
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-      if (Notification.permission === "granted") {
-        new Notification(`नयाँ Order - टेबल ${order.table}`, {
-          body: `${order.items.length} आइटम • ₹${order.total}`,
-          icon: "https://img.icons8.com/color/48/restaurant.png"
-        });
-      }
+  const firebaseConfig = {
+    apiKey: "AIzaSyAohDLMyfCo0Mivw99agloetfxPYrRcHPo",
+    authDomain: "my-restaurant-qr.firebaseapp.com",
+    databaseURL: "https://my-restaurant-qr-default-rtdb.firebaseio.com",
+    projectId: "my-restaurant-qr",
+    storageBucket: "my-restaurant-qr.firebasestorage.app",
+    messagingSenderId: "67721943429",
+    appId: "1:67721943429:web:392ec74551af0ef67a0cec"
+  };
 
-      container.innerHTML += `
-        <div class="bg-white p-6 rounded-3xl shadow-lg">
-          <div class="flex justify-between">
-            <h3 class="font-bold text-2xl">टेबल नं: ${order.table}</h3>
-            <span class="text-sm text-gray-500">${new Date().toLocaleTimeString('ne-NP')}</span>
-          </div>
-          <ul class="mt-4 space-y-1">
-            ${order.items.map(item => `<li class="text-lg">• ${item.name} × ${item.qty || 1}</li>`).join('')}
-          </ul>
-          <p class="font-bold text-xl mt-4 text-green-700">Total: ₹${order.total}</p>
-        </div>
-      `;
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let allOrders = {};
+  let currentFilter = 'all';
+  let isFirstLoad = true;
+
+  // LISTEN to orders in real-time
+  onValue(ref(db, 'orders'), (snapshot) => {
+    const data = snapshot.val() || {};
+    const prevKeys = Object.keys(allOrders);
+    allOrders = {};
+
+    snapshot.forEach(child => {
+      allOrders[child.key] = { id: child.key, ...child.val() };
     });
+
+    // Detect new orders (not on first load)
+    if (!isFirstLoad) {
+      const newKeys = Object.keys(allOrders).filter(k => !prevKeys.includes(k));
+      newKeys.forEach(k => {
+        const o = allOrders[k];
+        if (o.status === 'new') showToast(o);
+      });
+    }
+    isFirstLoad = false;
+    render();
   });
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAohDLMyfCo0Mivw99agloetfxPYrRcHPo",
-  authDomain: "my-restaurant-qr.firebaseapp.com",
-  databaseURL: "https://my-restaurant-qr-default-rtdb.firebaseio.com",
-  projectId: "my-restaurant-qr",
-  storageBucket: "my-restaurant-qr.firebasestorage.app",
-  messagingSenderId: "67721943429",
-  appId: "1:67721943429:web:392ec74551af0ef67a0cec",
-  measurementId: "G-JVX1VGNQPB"
-};
+  function render() {
+    const grid = document.getElementById('orders-grid');
+    const empty = document.getElementById('empty');
+    let list = Object.values(allOrders)
+      .filter(o => currentFilter === 'all' || o.status === currentFilter)
+      .sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-// Browser Notification Permission
-Notification.requestPermission();
+    // Stats
+    const all = Object.values(allOrders);
+    document.getElementById('s-new').textContent = all.filter(o=>o.status==='new').length;
+    document.getElementById('s-prep').textContent = all.filter(o=>o.status==='preparing').length;
+    document.getElementById('s-done').textContent = all.filter(o=>o.status==='done').length;
+    document.getElementById('s-rev').textContent = 'Rs.' + all.filter(o=>o.status==='done').reduce((s,o)=>s+o.totalPrice,0);
+
+    // Bell
+    const newCount = all.filter(o=>o.status==='new').length;
+    const bc = document.getElementById('bell-count');
+    bc.textContent = newCount;
+    newCount > 0 ? bc.classList.add('show') : bc.classList.remove('show');
+
+    if (list.length === 0) {
+      grid.innerHTML = '';
+      grid.appendChild(empty);
+      return;
+    }
+    empty.remove();
+
+    grid.innerHTML = list.map(o => {
+      const time = o.timestamp ? new Date(o.timestamp).toLocaleTimeString('ne-NP',{hour:'2-digit',minute:'2-digit'}) : '--:--';
+      const items = (o.items||[]).map(i=>
+        `<div class="ord-row"><span class="ord-name">${i.name}</span><span class="ord-qty">x${i.qty}</span><span class="ord-price">Rs.${i.qty*i.price}</span></div>`
+      ).join('');
+      const note = o.note ? `<div class="ord-note">💬 ${o.note}</div>` : '';
+      const badge = o.status==='new' ? `<span class="status-badge s-new">🔥 नयाँ</span>`
+                  : o.status==='preparing' ? `<span class="status-badge s-prep">👨‍🍳 बनाउँदै</span>`
+                  : `<span class="status-badge s-done">✅ सकियो</span>`;
+      const actions = o.status==='new'
+        ? `<button class="act-btn btn-prep" onclick="changeStatus('${o.id}','preparing')">👨‍🍳 बनाउँदै</button>`
+        : o.status==='preparing'
+        ? `<button class="act-btn btn-done" onclick="changeStatus('${o.id}','done')">✅ सकियो</button>`
+        : `<button class="act-btn btn-del" onclick="deleteOrder('${o.id}')">🗑 हटाउ</button>`;
+
+      return `<div class="order-card ${o.status}">
+        <div class="card-head ${o.status}">
+          <div><div class="tbl-num">📍 Table ${o.tableNumber}</div><div class="ord-id">${o.id.slice(-6).toUpperCase()}</div></div>
+          ${badge}
+        </div>
+        <div class="card-body">${items}${note}</div>
+        <div class="card-foot">
+          <div><div class="ord-total">Rs. ${o.totalPrice}</div><div class="ord-time">⏰ ${time}</div></div>
+          <div class="act-btns">${actions}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function showToast(order) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-title').textContent = `🔔 Table ${order.tableNumber} बाट नयाँ Order!`;
+    document.getElementById('toast-body').textContent = (order.items||[]).map(i=>`${i.name} x${i.qty}`).join(', ');
+    toast.classList.add('show');
+    // Ring bell
+    const bell = document.getElementById('bell');
+    bell.classList.remove('ring');
+    void bell.offsetWidth;
+    bell.classList.add('ring');
+    // Sound (beep)
+    try {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      osc.start(); osc.stop(ctx.currentTime + 0.5);
+    } catch(e) {}
+    setTimeout(() => toast.classList.remove('show'), 5000);
+  }
+
+  window.changeStatus = async (id, status) => {
+    await update(ref(db, `orders/${id}`), { status });
+  };
+
+  window.deleteOrder = async (id) => {
+    if (confirm('यो order हटाउने?')) await remove(ref(db, `orders/${id}`));
+  };
+
+  window.setFilter = (f, el) => {
+    currentFilter = f;
+    document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    render();
+  };
+
+  // Clock
+  setInterval(() => {
+    document.getElementById('clock').textContent = new Date().toLocaleTimeString('ne-NP');
+  }, 1000);
 </script>
 </body>
 </html>
