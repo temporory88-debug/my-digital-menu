@@ -1,51 +1,92 @@
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>काउन्टर ड्यासबोर्ड</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<h1 class="text-3xl font-bold text-center mb-8">🛎️ काउन्टर - नयाँ Order हरू</h1>
+<div id="orders" class="max-w-2xl mx-auto space-y-4"></div>
 
 <script>
-  // मेनु फाइलकै जस्तै सेम Firebase Config यहाँ पनि राख्नुहोस्
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    databaseURL: "YOUR_DATABASE_URL",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+// ==================== यहाँ तपाईंको Firebase Config राख्नुहोस् ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  authDomain: "your-project-id.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project-id.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:xxxxxxxxxxxxxxxxxxxxxxxx"
+};
+// =============================================================================
 
-  firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-  // फायरबेसबाट रियल-टाइममा अर्डरहरू तान्ने (Listen गर्ने)
-  database.ref('orders').on('value', (snapshot) => {
-    const ordersContainer = document.getElementById('orders-display'); // अर्डर देखाउने ठाउँको ID
-    ordersContainer.innerHTML = ""; // पुरानो लिस्ट सफा गर्ने
+function playNotificationSound() {
+  const audio = new Audio('https://freesound.org/data/previews/66/66929_931655-lq.mp3');
+  audio.play().catch(() => {});
+}
 
-    const allOrders = snapshot.val();
-    
-    if (allOrders) {
-      // अर्डरहरू लुप लगाएर स्क्रिनमा देखाउने
-      Object.keys(allOrders).forEach((orderId) => {
-        const order = allOrders[orderId];
-        
-        const orderHTML = `
-          <div class="order-card" style="border: 1px solid #ccc; padding: 10px; margin: 10px;">
-            <h3>टेबल नम्बर: ${order.table}</h3>
-            <p>कुल रकम: रु. ${order.total}</p>
-            <p>स्थिति: <strong>${order.status}</strong></p>
-            <button onclick="completeOrder('${orderId}')">तयार भयो</button>
+db.collection("orders").where("status", "==", "new")
+  .onSnapshot(snapshot => {
+    const container = document.getElementById('orders');
+    container.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const order = doc.data();
+      playNotificationSound();
+
+      if (Notification.permission === "granted") {
+        new Notification(`नयाँ Order - टेबल ${order.table}`, {
+          body: `${order.items.length} आइटम • ₹${order.total}`,
+          icon: "https://img.icons8.com/color/48/restaurant.png"
+        });
+      }
+
+      container.innerHTML += `
+        <div class="bg-white p-6 rounded-3xl shadow-lg">
+          <div class="flex justify-between">
+            <h3 class="font-bold text-2xl">टेबल नं: ${order.table}</h3>
+            <span class="text-sm text-gray-500">${new Date().toLocaleTimeString('ne-NP')}</span>
           </div>
-        `;
-        ordersContainer.innerHTML += orderHTML;
-      });
-    } else {
-      ordersContainer.innerHTML = "<p>कुनै पनि अर्डर आएको छैन।</p>";
-    }
+          <ul class="mt-4 space-y-1">
+            ${order.items.map(item => `<li class="text-lg">• ${item.name} × ${item.qty || 1}</li>`).join('')}
+          </ul>
+          <p class="font-bold text-xl mt-4 text-green-700">Total: ₹${order.total}</p>
+        </div>
+      `;
+    });
   });
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-  // अर्डर पुरा भएपछि डाटाबेसबाट हटाउने वा अपडेट गर्ने फङ्सन
-  function completeOrder(orderId) {
-    database.ref('orders/' + orderId).remove() // वा .update({status: 'Done'}) गर्न सक्नुहुन्छ
-      .then(() => alert("अर्डर पुरा भयो!"));
-  }
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAohDLMyfCo0Mivw99agloetfxPYrRcHPo",
+  authDomain: "my-restaurant-qr.firebaseapp.com",
+  databaseURL: "https://my-restaurant-qr-default-rtdb.firebaseio.com",
+  projectId: "my-restaurant-qr",
+  storageBucket: "my-restaurant-qr.firebasestorage.app",
+  messagingSenderId: "67721943429",
+  appId: "1:67721943429:web:392ec74551af0ef67a0cec",
+  measurementId: "G-JVX1VGNQPB"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+// Browser Notification Permission
+Notification.requestPermission();
 </script>
+</body>
+</html>
