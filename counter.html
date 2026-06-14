@@ -1,0 +1,51 @@
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+<script>
+  // मेनु फाइलकै जस्तै सेम Firebase Config यहाँ पनि राख्नुहोस्
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    databaseURL: "YOUR_DATABASE_URL",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+  // फायरबेसबाट रियल-टाइममा अर्डरहरू तान्ने (Listen गर्ने)
+  database.ref('orders').on('value', (snapshot) => {
+    const ordersContainer = document.getElementById('orders-display'); // अर्डर देखाउने ठाउँको ID
+    ordersContainer.innerHTML = ""; // पुरानो लिस्ट सफा गर्ने
+
+    const allOrders = snapshot.val();
+    
+    if (allOrders) {
+      // अर्डरहरू लुप लगाएर स्क्रिनमा देखाउने
+      Object.keys(allOrders).forEach((orderId) => {
+        const order = allOrders[orderId];
+        
+        const orderHTML = `
+          <div class="order-card" style="border: 1px solid #ccc; padding: 10px; margin: 10px;">
+            <h3>टेबल नम्बर: ${order.table}</h3>
+            <p>कुल रकम: रु. ${order.total}</p>
+            <p>स्थिति: <strong>${order.status}</strong></p>
+            <button onclick="completeOrder('${orderId}')">तयार भयो</button>
+          </div>
+        `;
+        ordersContainer.innerHTML += orderHTML;
+      });
+    } else {
+      ordersContainer.innerHTML = "<p>कुनै पनि अर्डर आएको छैन।</p>";
+    }
+  });
+
+  // अर्डर पुरा भएपछि डाटाबेसबाट हटाउने वा अपडेट गर्ने फङ्सन
+  function completeOrder(orderId) {
+    database.ref('orders/' + orderId).remove() // वा .update({status: 'Done'}) गर्न सक्नुहुन्छ
+      .then(() => alert("अर्डर पुरा भयो!"));
+  }
+</script>
