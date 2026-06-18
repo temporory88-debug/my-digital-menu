@@ -67,12 +67,12 @@
   .order-card { background: var(--card); border-radius: 12px; border: 1px solid #2a2a2a; overflow: hidden; animation: slideIn .3s ease; transition: transform .2s, box-shadow .2s; }
   .order-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.4); }
   @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
-  .order-card.New { border-color: var(--orange); }
+  .order-card.New, .order-card.new { border-color: var(--orange); }
   .order-card.preparing { border-color: var(--blue); }
   .order-card.done { border-color: var(--green); opacity: .6; }
 
   .card-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #222; }
-  .card-head.New { background: rgba(249,115,22,.08); }
+  .card-head.New, .card-head.new { background: rgba(249,115,22,.08); }
   .card-head.preparing { background: rgba(59,130,246,.08); }
   .card-head.done { background: rgba(34,197,94,.08); }
   .tbl-num { font-size: 16px; font-weight: 700; color: var(--gold); }
@@ -188,7 +188,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // अघिल्लो मेनु कोडसँग जोडिएको सहि Firebase Credentials
   const firebaseConfig = {
     apiKey: "AIzaSyDJ86I7sLw_4iW1FYnOUVGzJoo3z9n94Zc",
     authDomain: "menu-daef3.firebaseapp.com",
@@ -208,14 +207,28 @@
   let isFirstLoad = true;
   let voiceOn = true;
 
+  // Helper helper function to unify status checks due to case-sensitivity ("New" vs "new")
+  function getCleanStatus(status) {
+    if (!status) return 'New';
+    const s = status.toLowerCase();
+    if (s === 'new') return 'New';
+    return status; // yields 'preparing' or 'done'
+  }
+
   // ── VOICE ANNOUNCEMENT ──
   function announce(order) {
     if (!voiceOn) return;
     if (!window.speechSynthesis) return;
 
     const items = (order.items || []);
-    const itemText = items.map(i => `${i.qty} ${i.item_name}`).join(', ');
-    const text = `New order! Table number ${order.table || 'counter'}. ${itemText}. Please prepare.`;
+    const tableIdent = order.table || order.tableNumber || 'counter';
+    const itemText = items.map(i => {
+      const name = i.item_name || i.name || 'item';
+      const quantity = i.qty || i.quantity || 1;
+      return `${quantity} ${name}`;
+    }).join(', ');
+    
+    const text = `New order! Table number ${tableIdent}. ${itemText}. Please prepare.`;
 
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = 'en-US';
@@ -267,8 +280,14 @@
   // ── TOAST ──
   function showToast(order) {
     const items = (order.items||[]);
-    document.getElementById('toast-table').textContent = `📍 Table ${order.table || 'Counter'}`;
-    document.getElementById('toast-body').textContent = items.map(i=>`${i.item_name} × ${i.qty}`).join(', ');
+    const targetTable = order.table || order.tableNumber || 'काउन्टर/पार्सल';
+    document.getElementById('toast-table').textContent = `📍 Table ${targetTable}`;
+    document.getElementById('toast-body').textContent = items.map(i => {
+      const name = i.item_name || i.name || 'अज्ञात परिकार';
+      const quantity = i.qty || i.quantity || 1;
+      return `${name} × ${quantity}`;
+    }).join(', ');
+    
     const toast = document.getElementById('toast');
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 6000);
@@ -292,7 +311,7 @@
     if (!isFirstLoad) {
       const newKeys = Object.keys(allOrders).filter(k => !prevKeys.includes(k));
       newKeys.forEach(k => {
-        if (allOrders[k].status === 'New') showToast(allOrders[k]);
+        if (getCleanStatus(allOrders[k].status) === 'New') showToast(allOrders[k]);
       });
     }
     isFirstLoad = false;
@@ -303,16 +322,18 @@
   function render() {
     const grid = document.getElementById('orders-grid');
     let list = Object.values(allOrders)
-      .filter(o => currentFilter === 'all' || o.status === currentFilter)
+      .filter(o => currentFilter === 'all' || getCleanStatus(o.status) === currentFilter)
       .sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
 
     const all = Object.values(allOrders);
-    document.getElementById('s-new').textContent  = all.filter(o=>o.status==='New').length;
-    document.getElementById('s-prep').textContent = all.filter(o=>o.status==='preparing').length;
-    document.getElementById('s-done').textContent = all.filter(o=>o.status==='done').length;
-    document.getElementById('s-rev').textContent  = 'Rs.' + all.filter(o=>o.status==='done').reduce((s,o)=>s+(o.total||0),0);
+    document.getElementById('s-new').textContent  = all.filter(o=>getCleanStatus(o.status)==='New').length;
+    document.getElementById('s-prep').textContent = all.filter(o=>getCleanStatus(o.status)==='preparing').length;
+    document.getElementById('s-done').textContent = all.filter(o=>getCleanStatus(o.status)==='done').length;
+    
+    // Revenue calculations handling fallback keys 'total' or 'totalPrice'
+    document.getElementById('s-rev').textContent  = 'Rs.' + all.filter(o=>getCleanStatus(o.status)==='done').reduce((s,o)=>s+(o.total || o.totalPrice || 0),0);
 
-    const newCount = all.filter(o=>o.status==='New').length;
+    const newCount = all.filter(o=>getCleanStatus(o.status)==='New').length;
     const bc = document.getElementById('bell-count');
     bc.textContent = newCount;
     newCount > 0 ? bc.classList.add('show') : bc.classList.remove('show');
@@ -323,32 +344,43 @@
     }
 
     grid.innerHTML = list.map(o => {
+      const unifiedStatus = getCleanStatus(o.status);
       const time = o.timestamp
         ? new Date(o.timestamp).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
         : '--:--';
-      const items = (o.items||[]).map(i =>
-        `<div class="ord-row"><span class="ord-name">${i.item_name}</span><span class="ord-qty">×${i.qty}</span><span class="ord-price">Rs.${i.qty*i.price}</span></div>`
-      ).join('');
+        
+      const items = (o.items||[]).map(i => {
+        const name = i.item_name || i.name || 'अज्ञात परिकार';
+        const quantity = i.qty || i.quantity || 1;
+        const rate = i.price || 0;
+        return `<div class="ord-row"><span class="ord-name">${name}</span><span class="ord-qty">×${quantity}</span><span class="ord-price">Rs.${quantity * rate}</span></div>`;
+      }).join('');
+      
       const note = o.note ? `<div class="ord-note">💬 ${o.note}</div>` : '';
-      const badge = o.status==='New'
+      
+      const badge = unifiedStatus==='New'
         ? `<span class="status-badge s-new">🔥 नयाँ</span>`
-        : o.status==='preparing'
+        : unifiedStatus==='preparing'
         ? `<span class="status-badge s-prep">👨‍🍳 बनाउँदै</span>`
         : `<span class="status-badge s-done">✅ सकियो</span>`;
-      const actions = o.status==='New'
+        
+      const actions = unifiedStatus==='New'
         ? `<button class="act-btn btn-prep" onclick="changeStatus('${o.id}','preparing')">👨‍🍳 बनाउँदै</button>`
-        : o.status==='preparing'
+        : unifiedStatus==='preparing'
         ? `<button class="act-btn btn-done" onclick="changeStatus('${o.id}','done')">✅ सकियो</button>`
         : `<button class="act-btn btn-del" onclick="deleteOrder('${o.id}')">🗑 हटाउ</button>`;
 
-      return `<div class="order-card ${o.status}">
-        <div class="card-head ${o.status}">
-          <div><div class="tbl-num">📍 Table ${o.table}</div><div class="ord-id">#${o.id.slice(-6).toUpperCase()}</div></div>
+      const displayTable = o.table || o.tableNumber || 'काउन्टर/पार्सल';
+      const displayTotal = o.total || o.totalPrice || 0;
+
+      return `<div class="order-card ${unifiedStatus}">
+        <div class="card-head ${unifiedStatus}">
+          <div><div class="tbl-num">📍 Table ${displayTable}</div><div class="ord-id">#${o.id.slice(-6).toUpperCase()}</div></div>
           ${badge}
         </div>
         <div class="card-body">${items}${note}</div>
         <div class="card-foot">
-          <div><div class="ord-total">Rs. ${o.total}</div><div class="ord-time">⏰ ${time}</div></div>
+          <div><div class="ord-total">Rs. ${displayTotal}</div><div class="ord-time">⏰ ${time}</div></div>
           <div class="act-btns">${actions}</div>
         </div>
       </div>`;
