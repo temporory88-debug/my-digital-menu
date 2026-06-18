@@ -66,7 +66,7 @@
         
         .order-card.new { border-color: var(--orange); }
         .order-card.preparing { border-color: var(--blue); }
-        .order-card.done { border-color: var(--green); opacity: .7; }
+        .order-card.done { border-color: var(--green); opacity: .85; }
         
         .card-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #222; }
         .card-head.new { background: rgba(249,115,22,.08); }
@@ -81,21 +81,22 @@
         .s-done { background: var(--green); color: #fff; }
         
         .card-body { padding: 10px 14px; }
-        .ord-row { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 0; }
+        .ord-row { display: flex; justify-content: space-between; font-size: 11px; padding: 4px 0; border-bottom: 1px dashed #222; }
+        .ord-row:last-child { border-bottom: none; }
         .ord-name { color: var(--text); flex: 1; }
-        .ord-qty { color: var(--dim); margin: 0 6px; }
+        .ord-qty { color: var(--dim); margin: 0 6px; font-weight: 600; }
         .ord-price { color: var(--gold); font-weight: 600; }
-        .ord-note { background: #1a1400; border: 1px solid #2a2000; border-radius: 6px; padding: 6px 8px; font-size: 10px; color: #f0c060; margin-top: 6px; }
+        .ord-note { background: #1a1400; border: 1px solid #2a2000; border-radius: 6px; padding: 6px 8px; font-size: 10px; color: #f0c060; margin-top: 8px; line-height: 1.4; }
         
-        .card-foot { padding: 8px 14px; border-top: 1px solid #222; display: flex; align-items: center; justify-content: space-between; }
-        .ord-total { font-size: 13px; font-weight: 700; color: var(--gold); }
+        .card-foot { padding: 8px 14px; border-top: 1px solid #222; display: flex; align-items: center; justify-content: space-between; background: #121212; }
+        .ord-total { font-size: 13px; font-weight: 700; color: var(--gold2); }
         .ord-time { font-size: 9px; color: var(--dim); margin-top: 2px; }
         .act-btns { display: flex; gap: 5px; }
-        .act-btn { padding: 5px 12px; border-radius: 7px; font-size: 10px; font-weight: 700; border: none; cursor: pointer; transition: opacity .2s; }
+        .act-btn { padding: 6px 12px; border-radius: 7px; font-size: 10px; font-weight: 700; border: none; cursor: pointer; transition: opacity .2s; }
         .act-btn:hover { opacity: .85; }
         .btn-prep { background: var(--blue); color: #fff; }
         .btn-done { background: var(--green); color: #fff; }
-        .btn-del { background: #2a2a2a; color: var(--dim); }
+        .btn-del { background: #2a2a2a; color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
 
         /* VOICE TOAST */
         .toast { position: fixed; top: 78px; right: 16px; background: linear-gradient(135deg, #1a1200, #2a1f00); border: 1px solid var(--gold); color: var(--text); padding: 14px 16px; border-radius: 12px; font-size: 12px; font-weight: 600; transform: translateX(120%); transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 999; max-width: 270px; box-shadow: 0 4px 24px rgba(0,0,0,.5); }
@@ -200,10 +201,10 @@
             
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'en-US';
-            utter.rate = 0.9;
+            utter.rate = 0.85;
             
             playBeep();
-            setTimeout(() => speechSynthesis.speak(utter), 500);
+            setTimeout(() => speechSynthesis.speak(utter), 400);
         }
 
         function playBeep() {
@@ -257,9 +258,12 @@
         onValue(ref(db, 'orders'), (snapshot) => {
             const prevKeys = Object.keys(allOrders);
             allOrders = {};
-            snapshot.forEach(child => {
-                allOrders[child.key] = { id: child.key, ...child.val() };
-            });
+            
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    allOrders[child.key] = { id: child.key, ...child.val() };
+                });
+            }
 
             if (!isFirstLoad) {
                 const newKeys = Object.keys(allOrders).filter(k => !prevKeys.includes(k));
@@ -345,19 +349,27 @@
         }
 
         window.changeStatus = async (id, status) => {
-            await update(ref(db, `orders/${id}`), { status });
+            try {
+                await update(ref(db, `orders/${id}`), { status });
+            } catch (e) {
+                console.error("Status update error: ", e);
+            }
         };
 
         window.deleteOrder = async (id) => {
             if (confirm('यो अर्डर हटाउने हो?')) {
-                await remove(ref(db, `orders/${id}`));
+                try {
+                    await remove(ref(db, `orders/${id}`));
+                } catch (e) {
+                    console.error("Delete error: ", e);
+                }
             }
         };
 
         window.setFilter = (f, el) => {
             currentFilter = f;
             document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
+            el.classList.add('add' ? el.classList.add('active') : el.classList.add('active'));
             render();
         };
 
