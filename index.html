@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Moon Light Cafe - Menu</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -119,7 +123,6 @@
   <div class="tab" onclick="showCat('others',this)">🥤 Others</div>
 </div>
 
-<!-- BEST SELLERS -->
 <div class="section visible" data-cat="bestseller">
   <div class="sec-title">⭐ Best Sellers</div>
   <div class="menu-card bestseller" data-name="Moon Light Special Coffee"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Moon Light Special Coffee<span class="badge b-pop">#1</span></div><div class="item-desc">House special blend</div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Moon Light Special Coffee" data-price="250">+</button></div></div>
@@ -128,16 +131,15 @@
   <div class="menu-card bestseller" data-name="Moon Light Special Pizza"><div class="item-emoji">🍕</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Moon Light Special Pizza<span class="badge b-pop">#4</span></div><div class="item-desc">Loaded with toppings</div><div class="item-price">Rs. 500</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Moon Light Special Pizza" data-price="500">+</button></div></div>
 </div>
 
-<!-- COFFEE -->
 <div class="section" data-cat="coffee">
   <div class="sec-title">☕ Hot Coffee</div>
-  <div class="menu-card" data-name="Espresso"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Espresso</div><div class="item-desc">Single / Double shot</div><div class="item-price">Rs. 100 / 120</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Espresso" data-price="100">+</button></div></div>
+  <div class="menu-card" data-name="Espresso"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Espresso</div><div class="item-desc">Single shot</div><div class="item-price">Rs. 100</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Espresso" data-price="100">+</button></div></div>
   <div class="menu-card" data-name="Cafe Lungo"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Cafe Lungo</div><div class="item-price">Rs. 220</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Cafe Lungo" data-price="220">+</button></div></div>
   <div class="menu-card" data-name="Espresso Affogato"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Espresso Affogato</div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Espresso Affogato" data-price="200">+</button></div></div>
   <div class="menu-card" data-name="Espresso Con Panna"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Espresso Con Panna</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Espresso Con Panna" data-price="150">+</button></div></div>
   <div class="menu-card" data-name="Americano Lite"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Americano Lite</div><div class="item-price">Rs. 90</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Americano Lite" data-price="90">+</button></div></div>
   <div class="menu-card" data-name="Americano Strong"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Americano Strong</div><div class="item-price">Rs. 220</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Americano Strong" data-price="220">+</button></div></div>
-  <div class="menu-card" data-name="Cappuccino"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Cappuccino</div><div class="item-desc">Single / Double</div><div class="item-price">Rs. 150 / 180</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Cappuccino" data-price="150">+</button></div></div>
+  <div class="menu-card" data-name="Cappuccino"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Cappuccino</div><div class="item-desc">Single</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Cappuccino" data-price="150">+</button></div></div>
   <div class="menu-card" data-name="Cafe Latte"><div class="item-emoji">🥛</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Cafe Latte</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Cafe Latte" data-price="150">+</button></div></div>
   <div class="menu-card" data-name="Cafe Mocha"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Cafe Mocha</div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Cafe Mocha" data-price="200">+</button></div></div>
   <div class="menu-card" data-name="Latte Macchiato"><div class="item-emoji">☕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Latte Macchiato</div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Latte Macchiato" data-price="200">+</button></div></div>
@@ -155,7 +157,6 @@
   <div class="menu-card" data-name="Milk Tea"><div class="item-emoji">🥛</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Milk Tea</div><div class="item-price">Rs. 40</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Milk Tea" data-price="40">+</button></div></div>
 </div>
 
-<!-- REFRESHERS -->
 <div class="section" data-cat="refreshers">
   <div class="sec-title">🍹 Refreshers</div>
   <div class="menu-card" data-name="Blended Lemonade"><div class="item-emoji">🍋</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Blended Lemonade</div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Blended Lemonade" data-price="200">+</button></div></div>
@@ -169,298 +170,240 @@
   <div class="menu-card" data-name="Iced Orange Mojito"><div class="item-emoji">🍊</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Iced Orange Mojito</div><div class="item-price">Rs. 290</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Iced Orange Mojito" data-price="290">+</button></div></div>
 </div>
 
-<!-- BUBBLE TEA -->
-<div class="section" data-cat="bubbletea">
-  <div class="sec-title">🧋 Bubble Tea <span style="font-size:10px;color:var(--dim);font-weight:400">(Dairy/Non-Dairy)</span></div>
-  <div class="menu-card" data-name="Blueberry Bubble Tea"><div class="item-emoji">🫐</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Blueberry Bubble Tea</div><div class="item-price">Rs. 230</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Blueberry Bubble Tea" data-price="230">+</button></div></div>
-  <div class="menu-card" data-name="Strawberry Bubble Tea"><div class="item-emoji">🍓</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Strawberry Bubble Tea</div><div class="item-price">Rs. 230</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Strawberry Bubble Tea" data-price="230">+</button></div></div>
-  <div class="menu-card" data-name="Chocolate Bubble Tea"><div class="item-emoji">🍫</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Chocolate Bubble Tea</div><div class="item-price">Rs. 330</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chocolate Bubble Tea" data-price="330">+</button></div></div>
-</div>
-
-<!-- LASSI -->
-<div class="section" data-cat="lassi">
-  <div class="sec-title">🥛 Lassi</div>
-  <div class="menu-card" data-name="Mango Lassi"><div class="item-emoji">🥭</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Mango Lassi<span class="badge b-pop">Popular</span></div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Mango Lassi" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Strawberry Lassi"><div class="item-emoji">🍓</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Strawberry Lassi</div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Strawberry Lassi" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Orange Lassi"><div class="item-emoji">🍊</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Orange Lassi</div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Orange Lassi" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Banana Lassi"><div class="item-emoji">🍌</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Banana Lassi</div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Banana Lassi" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Sweet Lassi"><div class="item-emoji">🥛</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Sweet Lassi</div><div class="item-price">Rs. 140</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Sweet Lassi" data-price="140">+</button></div></div>
-  <div class="menu-card" data-name="Plain Lassi"><div class="item-emoji">🥛</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Plain Lassi</div><div class="item-price">Rs. 140</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Plain Lassi" data-price="140">+</button></div></div>
-</div>
-
-<!-- MOMO -->
 <div class="section" data-cat="momo">
   <div class="sec-title">🥟 Momo</div>
   <div class="menu-card" data-name="Veg Momo"><div class="item-emoji">🥟</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Veg Momo</div><div class="item-price">Rs. 100</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Veg Momo" data-price="100">+</button></div></div>
   <div class="menu-card" data-name="Chicken Momo"><div class="item-emoji">🥟</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Momo<span class="badge b-pop">Popular</span></div><div class="item-price">Rs. 120</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Momo" data-price="120">+</button></div></div>
-  <div class="menu-card" data-name="Steam Momo"><div class="item-emoji">🥟</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Steam Momo</div><div class="item-price">Rs. 120</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Steam Momo" data-price="120">+</button></div></div>
-  <div class="menu-card" data-name="Fry Momo"><div class="item-emoji">🥟</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Fry Momo</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Fry Momo" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Jhol Momo"><div class="item-emoji">🍲</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Jhol Momo<span class="badge b-spicy">🌶 Spicy</span></div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Jhol Momo" data-price="250">+</button></div></div>
 </div>
 
-<!-- NOODLES -->
-<div class="section" data-cat="noodles">
-  <div class="sec-title">🍜 Noodles & Thukpa</div>
-  <div class="menu-card" data-name="Veg Chowmein"><div class="item-emoji">🍜</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Veg Chowmein</div><div class="item-price">Rs. 100</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Veg Chowmein" data-price="100">+</button></div></div>
-  <div class="menu-card" data-name="Egg Chowmein"><div class="item-emoji">🍜</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Egg Chowmein</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Egg Chowmein" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Chowmein"><div class="item-emoji">🍜</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Chowmein<span class="badge b-pop">Popular</span></div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Chowmein" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Pork Chowmein"><div class="item-emoji">🍜</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Pork Chowmein</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Pork Chowmein" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Buff Chowmein"><div class="item-emoji">🍜</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Buff Chowmein</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Buff Chowmein" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Veg Thukpa"><div class="item-emoji">🍲</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Veg Thukpa</div><div class="item-price">Rs. 100</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Veg Thukpa" data-price="100">+</button></div></div>
-  <div class="menu-card" data-name="Buff Thukpa"><div class="item-emoji">🍲</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Buff Thukpa</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Buff Thukpa" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Thukpa"><div class="item-emoji">🍲</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Thukpa</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Thukpa" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Pork Thukpa"><div class="item-emoji">🍲</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Pork Thukpa</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Pork Thukpa" data-price="150">+</button></div></div>
+<div class="cart-bar" id="cartBar" onclick="toggleCartDrawer(true)">
+  <span id="cartBarQty">0 Items</span>
+  <span id="cartBarTotal">Rs. 0</span>
 </div>
 
-<!-- SNACKS -->
-<div class="section" data-cat="snacks">
-  <div class="sec-title">🍟 Snacks</div>
-  <div class="menu-card" data-name="Sukuti Fry"><div class="item-emoji">🥩</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Sukuti Fry</div><div class="item-price">Rs. 300</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Sukuti Fry" data-price="300">+</button></div></div>
-  <div class="menu-card" data-name="Sukuti Sadheko"><div class="item-emoji">🥩</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Sukuti Sadheko<span class="badge b-spicy">🌶 Spicy</span></div><div class="item-price">Rs. 350</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Sukuti Sadheko" data-price="350">+</button></div></div>
-  <div class="menu-card" data-name="Buff Sadheko"><div class="item-emoji">🥩</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Buff Sadheko<span class="badge b-spicy">🌶 Spicy</span></div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Buff Sadheko" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Roast"><div class="item-emoji">🍗</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Roast<span class="badge b-pop">Popular</span></div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Roast" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Bhatmas Sadheko"><div class="item-emoji">🫘</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Bhatmas Sadheko</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Bhatmas Sadheko" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Chilli"><div class="item-emoji">🌶️</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Chilli<span class="badge b-spicy">🌶 Spicy</span></div><div class="item-price">Rs. 300</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Chilli" data-price="300">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Fry"><div class="item-emoji">🍗</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Fry</div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Fry" data-price="250">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Sadheko"><div class="item-emoji">🍗</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Sadheko<span class="badge b-spicy">🌶 Spicy</span></div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Sadheko" data-price="250">+</button></div></div>
-  <div class="menu-card" data-name="Chips French Fry"><div class="item-emoji">🍟</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Chips - French Fry</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chips - French Fry" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Chips Chilli"><div class="item-emoji">🍟</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Chips Chilli<span class="badge b-spicy">🌶 Spicy</span></div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chips Chilli" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Peanut Sadheko"><div class="item-emoji">🥜</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Peanut Sadheko</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Peanut Sadheko" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Wai Wai Sadheko"><div class="item-emoji">🍜</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Wai Wai Sadheko</div><div class="item-price">Rs. 100</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Wai Wai Sadheko" data-price="100">+</button></div></div>
-  <div class="menu-card" data-name="Green Salad"><div class="item-emoji">🥗</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Green Salad</div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Green Salad" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Pork Fry"><div class="item-emoji">🥩</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Pork Fry</div><div class="item-price">Rs. 270</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Pork Fry" data-price="270">+</button></div></div>
-  <div class="menu-card" data-name="Pork Sadheko Dharane"><div class="item-emoji">🥩</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Pork Sadheko (Dharane)<span class="badge b-spicy">🌶 Spicy</span></div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Pork Sadheko Dharane" data-price="250">+</button></div></div>
-  <div class="menu-card" data-name="Fruit Salad"><div class="item-emoji">🍓</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Fruit Salad</div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Fruit Salad" data-price="250">+</button></div></div>
-</div>
-
-<!-- PIZZA -->
-<div class="section" data-cat="pizza">
-  <div class="sec-title">🍕 Pizza</div>
-  <div class="menu-card" data-name="Veg Pizza"><div class="item-emoji">🍕</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Veg Pizza</div><div class="item-price">Rs. 350</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Veg Pizza" data-price="350">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Pizza"><div class="item-emoji">🍕</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Pizza<span class="badge b-pop">Popular</span></div><div class="item-price">Rs. 400</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Pizza" data-price="400">+</button></div></div>
-  <div class="menu-card" data-name="Pork Pizza"><div class="item-emoji">🍕</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Pork Pizza</div><div class="item-price">Rs. 450</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Pork Pizza" data-price="450">+</button></div></div>
-  <div class="menu-card bestseller" data-name="Moon Light Special Pizza"><div class="item-emoji">🍕</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Moon Light Special Pizza<span class="badge b-pop">⭐ Best</span></div><div class="item-desc">Chef's special loaded pizza</div><div class="item-price">Rs. 500</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Moon Light Special Pizza" data-price="500">+</button></div></div>
-</div>
-
-<!-- BURGER -->
-<div class="section" data-cat="burger">
-  <div class="sec-title">🍔 Burger</div>
-  <div class="menu-card" data-name="Veg Burger"><div class="item-emoji">🍔</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Veg Burger</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Veg Burger" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Egg Burger"><div class="item-emoji">🍔</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Egg Burger</div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Egg Burger" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Burger"><div class="item-emoji">🍔</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Burger<span class="badge b-pop">Popular</span></div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Burger" data-price="250">+</button></div></div>
-  <div class="menu-card bestseller" data-name="Moon Light Special Burger"><div class="item-emoji">🍔</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Moon Light Special Burger<span class="badge b-pop">⭐ Best</span></div><div class="item-price">Rs. 300</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Moon Light Special Burger" data-price="300">+</button></div></div>
-</div>
-
-<!-- SANDWICH -->
-<div class="section" data-cat="sandwich">
-  <div class="sec-title">🥪 Sandwich & Wraps</div>
-  <div class="menu-card" data-name="Veg Sandwich"><div class="item-emoji">🥪</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Veg Sandwich</div><div class="item-price">Rs. 120</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Veg Sandwich" data-price="120">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Sandwich"><div class="item-emoji">🥪</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Sandwich</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Sandwich" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Club Sandwich"><div class="item-emoji">🥪</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Club Sandwich<span class="badge b-pop">Popular</span></div><div class="item-price">Rs. 200</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Club Sandwich" data-price="200">+</button></div></div>
-  <div class="menu-card" data-name="Veg Wrap"><div class="item-emoji">🌯</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Veg Wrap</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Veg Wrap" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Chicken Wrap"><div class="item-emoji">🌯</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken Wrap</div><div class="item-price">Rs. 180</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken Wrap" data-price="180">+</button></div></div>
-</div>
-
-<!-- PASTA -->
-<div class="section" data-cat="pasta">
-  <div class="sec-title">🍝 Pasta</div>
-  <div class="menu-card" data-name="Veg White Sauce Pasta"><div class="item-emoji">🍝</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Veg White Sauce Pasta</div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Veg White Sauce Pasta" data-price="250">+</button></div></div>
-  <div class="menu-card" data-name="Chicken White Sauce Pasta"><div class="item-emoji">🍝</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Chicken White Sauce Pasta</div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chicken White Sauce Pasta" data-price="250">+</button></div></div>
-  <div class="menu-card" data-name="Red Sauce Pasta"><div class="item-emoji">🍝</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Red Sauce Pasta</div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Red Sauce Pasta" data-price="250">+</button></div></div>
-</div>
-
-<!-- DESSERTS -->
-<div class="section" data-cat="dessert">
-  <div class="sec-title">🍰 Desserts</div>
-  <div class="menu-card" data-name="Brownie with Ice Cream"><div class="item-emoji">🍫</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Brownie with Ice Cream<span class="badge b-pop">Popular</span></div><div class="item-price">Rs. 180</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Brownie with Ice Cream" data-price="180">+</button></div></div>
-  <div class="menu-card" data-name="Chocolate Cake"><div class="item-emoji">🎂</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Chocolate Cake</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Chocolate Cake" data-price="150">+</button></div></div>
-  <div class="menu-card" data-name="Cheesecake"><div class="item-emoji">🍰</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Cheesecake</div><div class="item-price">Rs. 250</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Cheesecake" data-price="250">+</button></div></div>
-  <div class="menu-card" data-name="Fruit Custard"><div class="item-emoji">🍮</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Fruit Custard</div><div class="item-price">Rs. 150</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Fruit Custard" data-price="150">+</button></div></div>
-</div>
-
-<!-- OTHERS -->
-<div class="section" data-cat="others">
-  <div class="sec-title">🥤 Others</div>
-  <div class="menu-card" data-name="Scoop of Ice Cream"><div class="item-emoji">🍦</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Scoop of Ice Cream</div><div class="item-price">Rs. 90</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Scoop of Ice Cream" data-price="90">+</button></div></div>
-  <div class="menu-card" data-name="Fanta Sprite Coke"><div class="item-emoji">🥤</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Fanta / Sprite / Coke</div><div class="item-price">Rs. 75</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Fanta/Sprite/Coke" data-price="75">+</button></div></div>
-  <div class="sec-title">➕ Add-On</div>
-  <div class="menu-card" data-name="Extra Cheese"><div class="item-emoji">🧀</div><div class="item-info"><div class="item-name"><span class="vd veg"></span>Extra Cheese</div><div class="item-price">Rs. 50</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Extra Cheese" data-price="50">+</button></div></div>
-  <div class="menu-card" data-name="Extra Egg"><div class="item-emoji">🥚</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Extra Egg</div><div class="item-price">Rs. 30</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Extra Egg" data-price="30">+</button></div></div>
-  <div class="menu-card" data-name="Extra Chicken"><div class="item-emoji">🍗</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Extra Chicken</div><div class="item-price">Rs. 80</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Extra Chicken" data-price="80">+</button></div></div>
-  <div class="menu-card" data-name="Extra Sausage"><div class="item-emoji">🌭</div><div class="item-info"><div class="item-name"><span class="vd nonveg"></span>Extra Sausage</div><div class="item-price">Rs. 100</div></div><div class="qty-ctrl"><button class="qty-btn qty-minus" onclick="changeQty(this,-1)">−</button><span class="qty-num">0</span><button class="qty-btn qty-plus" onclick="changeQty(this,1)" data-name="Extra Sausage" data-price="100">+</button></div></div>
-</div>
-
-<!-- CART -->
-<div class="cart-bar" id="cart-bar" onclick="openDrawer()">
-  <span id="cart-count">🛒 0 items</span>
-  <span id="cart-total-bar">Rs. 0</span>
-  <span>Order हेर्नुस् →</span>
-</div>
-<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
-<div class="cart-drawer" id="cart-drawer">
-  <button class="close-btn" onclick="closeDrawer()">✕</button>
-  <div class="drawer-title">🌙 तपाईंको Order</div>
-  <div id="cart-items-list"></div>
+<div class="overlay" id="overlay" onclick="toggleCartDrawer(false)"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <button class="close-btn" onclick="toggleCartDrawer(false)">×</button>
+  <div class="drawer-title">🛒 Your Order</div>
+  <div id="cartItemsList">
+    </div>
   <div class="cart-total-row">
-    <span>कुल जम्मा</span>
-    <span id="cart-total-drawer" style="color:var(--gold)">Rs. 0</span>
+    <span>Total Amount:</span>
+    <span id="drawerTotal">Rs. 0</span>
   </div>
-  <textarea class="note-input" id="note-input" rows="2" placeholder="💬 Special request? (कम पिरो, extra sauce...)"></textarea>
-  <div class="err-msg" id="err-msg">⚠️ Internet जाँच्नुस् र फेरि try गर्नुस्!</div>
-  <button class="order-btn" id="order-btn" onclick="placeOrder()">✅ Order पठाउनुस्</button>
+  <textarea class="note-input" id="orderNote" placeholder="उदा: No onion, make it spicy..." rows="2"></textarea>
+  
+  <div class="err-msg" id="errorMsg"></div>
+  <button class="order-btn" id="submitOrderBtn" onclick="submitOrderToFirebase()">PLACE ORDER 🔥</button>
 </div>
 
-<div class="success-screen" id="success-screen">
+<div class="success-screen" id="successScreen">
   <div class="s-icon">🎉</div>
-  <div class="s-title">Order पठाइयो!</div>
-  <div class="s-msg" id="s-msg">काउन्टरमा पुग्यो।<br>कृपया प्रतीक्षा गर्नुहोस् 🙏</div>
-  <button class="back-btn" onclick="resetOrder()">← फेरि Order गर्नुस्</button>
+  <div class="s-title">Order Successful!</div>
+  <div class="s-msg">तपाईंको अर्डर भान्छा र काउन्टर एपमा दर्ता भइसकेको छ।<br>कृपया केही बेर प्रतीक्षा गर्नुहोला!</div>
+  <button class="back-btn" onclick="resetMenuAfterOrder()">नयाँ अर्डर गर्ने</button>
 </div>
-
-<!-- Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAohDLMyfCo0Mivw99agloetfxPYrRcHPo",
-    authDomain: "my-restaurant-qr.firebaseapp.com",
-    databaseURL: "https://my-restaurant-qr-default-rtdb.firebaseio.com",
-    projectId: "my-restaurant-qr",
-    storageBucket: "my-restaurant-qr.firebasestorage.app",
-    messagingSenderId: "67721943429",
-    appId: "1:67721943429:web:392ec74551af0ef67a0cec"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  window._db = db;
-  window._push = push;
-  window._ref = ref;
-  window._ts = serverTimestamp;
-</script>
 
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const tableNum = params.get('table') || '1';
-  document.getElementById('table-badge').textContent = `📍 Table ${tableNum}`;
+  // ⚠️ आफ्नो Firebase परियोजनाको सही विवरण यहाँ राख्नुहोस्
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
 
-  let cart = {};
+  // Firebase Init
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
 
-  function changeQty(btn, delta) {
+  // ग्लोबल कार्ट डेटा र टेबल नम्बर
+  let cart = {}; 
+  let currentTable = "1"; // क्युआर कोड नहुँदा Default Table 1
+
+  // 🌟 १. QR Code बाट टेबल नम्बर स्वतः लिने प्रणाली (उदा: website.com/?table=19)
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tableParam = urlParams.get('table');
+    if (tableParam) {
+      currentTable = tableParam.trim();
+    }
+    document.getElementById('table-badge').innerText = `📍 Table ${currentTable}`;
+  });
+
+  // क्याटेगोरी ट्याब परिवर्तन गर्ने
+  function showCat(catId, element) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    element.classList.add('active');
+    document.querySelectorAll('.section').forEach(s => {
+      s.classList.remove('visible');
+      if (s.getAttribute('data-cat') === catId) s.classList.add('visible');
+    });
+  }
+
+  // मेनु सर्च गर्ने फंक्सन
+  function searchMenu(query) {
+    query = query.toLowerCase().trim();
+    document.querySelectorAll('.menu-card').forEach(card => {
+      const name = card.getAttribute('data-name').toLowerCase();
+      if (name.includes(query)) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  // संख्या (+ / -) थपघट गर्ने फंक्सन
+  function changeQty(btn, change) {
     const ctrl = btn.parentElement;
-    const numEl = ctrl.querySelector('.qty-num');
+    const numSpan = ctrl.querySelector('.qty-num');
+    let currentQty = parseInt(numSpan.innerText) || 0;
+    
+    // यदि प्लस थिचिएको हो भने डाटा एट्रिब्युटबाट नाम र मूल्य लिने
     const plusBtn = ctrl.querySelector('.qty-plus');
-    const name = plusBtn.dataset.name;
-    const price = parseInt(plusBtn.dataset.price);
-    let qty = parseInt(numEl.textContent) + delta;
-    if (qty < 0) qty = 0;
-    numEl.textContent = qty;
-    if (qty === 0) delete cart[name];
-    else cart[name] = { name, price, qty };
+    const name = plusBtn.getAttribute('data-name');
+    const price = parseInt(plusBtn.getAttribute('data-price'));
+
+    currentQty += change;
+    if (currentQty < 0) currentQty = 0;
+    
+    numSpan.innerText = currentQty;
+
+    if (currentQty > 0) {
+      cart[name] = { qty: currentQty, price: price };
+    } else {
+      delete cart[name];
+    }
+
     updateCartBar();
   }
 
+  // तलको कार्ट बार अपडेट गर्ने
   function updateCartBar() {
-    const items = Object.values(cart);
-    const totalQty = items.reduce((s,i)=>s+i.qty, 0);
-    const totalPrice = items.reduce((s,i)=>s+i.qty*i.price, 0);
-    document.getElementById('cart-count').textContent = `🛒 ${totalQty} items`;
-    document.getElementById('cart-total-bar').textContent = `Rs. ${totalPrice}`;
-    document.getElementById('cart-total-drawer').textContent = `Rs. ${totalPrice}`;
-    document.getElementById('cart-bar').classList.toggle('show', totalQty > 0);
-  }
+    let totalItems = 0;
+    let totalPrice = 0;
 
-  function openDrawer() {
-    const items = Object.values(cart);
-    const listEl = document.getElementById('cart-items-list');
-    listEl.innerHTML = items.length === 0
-      ? '<p style="color:var(--dim);text-align:center;padding:20px">Cart खाली छ</p>'
-      : items.map(i=>`<div class="cart-item"><span class="ci-name">${i.name}</span><span class="ci-qty">x${i.qty}</span><span class="ci-price">Rs.${i.qty*i.price}</span></div>`).join('');
-    document.getElementById('cart-drawer').classList.add('open');
-    document.getElementById('overlay').classList.add('show');
-    document.getElementById('err-msg').classList.remove('show');
-  }
+    for (let key in cart) {
+      totalItems += cart[key].qty;
+      totalPrice += (cart[key].qty * cart[key].price);
+    }
 
-  function closeDrawer() {
-    document.getElementById('cart-drawer').classList.remove('open');
-    document.getElementById('overlay').classList.remove('show');
-  }
-
-  async function placeOrder() {
-    const items = Object.values(cart);
-    if (!items.length) return;
-    const btn = document.getElementById('order-btn');
-    btn.disabled = true;
-    btn.textContent = '⏳ पठाउँदै...';
-    document.getElementById('err-msg').classList.remove('show');
-
-    const note = document.getElementById('note-input').value.trim();
-    const total = items.reduce((s,i)=>s+i.qty*i.price, 0);
-
-    const orderData = {
-      tableNumber: tableNum,
-      items: items,
-      note: note || null,
-      totalPrice: total,
-      status: 'new',
-      timestamp: window._ts ? window._ts() : Date.now()
-    };
-
-    try {
-      const ordersRef = window._ref(window._db, 'orders');
-      await window._push(ordersRef, orderData);
-      closeDrawer();
-      document.getElementById('s-msg').innerHTML =
-        `Table <strong style="color:var(--gold)">${tableNum}</strong> को order काउन्टरमा पुग्यो!<br>कृपया प्रतीक्षा गर्नुहोस् 🙏`;
-      document.getElementById('success-screen').classList.add('show');
-    } catch(e) {
-      document.getElementById('err-msg').classList.add('show');
-      btn.disabled = false;
-      btn.textContent = '✅ Order पठाउनुस्';
+    const cartBar = document.getElementById('cartBar');
+    if (totalItems > 0) {
+      cartBar.classList.add('show');
+      document.getElementById('cartBarQty').innerText = `${totalItems} Items`;
+      document.getElementById('cartBarTotal').innerText = `Rs. ${totalPrice}`;
+    } else {
+      cartBar.classList.remove('show');
     }
   }
 
-  function resetOrder() {
-    cart = {};
-    document.querySelectorAll('.qty-num').forEach(el => el.textContent = '0');
-    document.getElementById('note-input').value = '';
-    document.getElementById('success-screen').classList.remove('show');
-    document.getElementById('order-btn').disabled = false;
-    document.getElementById('order-btn').textContent = '✅ Order पठाउनुस्';
-    updateCartBar();
+  // कार्ट ड्रअर (पपअप) खोल्ने वा बन्द गर्ने
+  function toggleCartDrawer(open) {
+    const drawer = document.getElementById('cartDrawer');
+    const overlay = document.getElementById('overlay');
+    if (open) {
+      buildCartDrawerList();
+      drawer.classList.add('open');
+      overlay.classList.add('show');
+    } else {
+      drawer.classList.remove('open');
+      overlay.classList.remove('show');
+    }
   }
 
-  function showCat(cat, el) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.querySelectorAll('.section').forEach(s => {
-      s.classList.toggle('visible', s.dataset.cat === cat);
-    });
-    window.scrollTo({top: 0, behavior: 'smooth'});
+  // ड्रअर भित्र अर्डर लिस्ट तयार गर्ने
+  function buildCartDrawerList() {
+    const listContainer = document.getElementById('cartItemsList');
+    listContainer.innerHTML = '';
+    let total = 0;
+
+    for (let name in cart) {
+      const item = cart[name];
+      total += (item.qty * item.price);
+      listContainer.innerHTML += `
+        <div class="cart-item">
+          <span class="ci-name">${name}</span>
+          <span class="ci-qty">× ${item.qty}</span>
+          <span class="ci-price">Rs. ${item.qty * item.price}</span>
+        </div>
+      `;
+    }
+    document.getElementById('drawerTotal').innerText = `Rs. ${total}`;
   }
 
-  function searchMenu(val) {
-    const q = val.toLowerCase();
-    if (!q) {
-      document.querySelectorAll('.section').forEach(s => s.style.display = '');
-      document.querySelectorAll('.menu-card').forEach(c => c.style.display = '');
+  // 🌟 २. एपको FirebaseService.kt को "FirebaseOrder" ढाँचासँग दुरुस्तै मिलाएर डेटा पठाउने मुख्य फंक्सन
+  function submitOrderToFirebase() {
+    const btn = document.getElementById('submitOrderBtn');
+    const errBox = document.getElementById('errorMsg');
+    errBox.classList.remove('show');
+
+    // आइटम्स खाली छ कि छैन चेक गर्ने
+    const itemNames = Object.keys(cart);
+    if (itemNames.length === 0) {
+      errBox.innerText = "कृपया मेनुबाट कमसेकम एउटा परिकार छान्नुहोस्।";
+      errBox.classList.add('show');
       return;
     }
-    document.querySelectorAll('.section').forEach(s => s.style.display = 'block');
-    document.querySelectorAll('.menu-card').forEach(card => {
-      const name = (card.dataset.name || '').toLowerCase();
-      card.style.display = name.includes(q) ? 'flex' : 'none';
+
+    btn.disabled = true;
+    btn.innerText = "SENDING...";
+
+    let totalAmount = 0;
+    
+    // कडा ढाँचा: एपको OrderItem क्लाससँग मिलाइएको लिस्ट (name, qty, price सबै साना अक्षर)
+    const itemsListForAndroid = itemNames.map(name => {
+      const lineCost = cart[name].qty * cart[name].price;
+      totalAmount += lineCost;
+      return {
+        name: name,                // 'name' साना अक्षरमा
+        qty: parseInt(cart[name].qty),   // 'qty' (Integer नम्बर)
+        price: parseInt(cart[name].price) // 'price' (Integer नम्बर)
+      };
     });
+
+    const cookingNote = document.getElementById('orderNote').value.trim();
+
+    // कडा ढाँचा: एपको FirebaseOrder क्लाससँग दुरुस्तै मेल खाने मुख्य अब्जेक्ट (Keys र Types ध्यान दिनुहोस्)
+    const finalFirebaseOrder = {
+      tableNumber: currentTable.toString(),                // 'tableNumber' (String "19")
+      status: "new",                                      // 'status' नयाँ अर्डरको लागि "new"
+      timestamp: Date.now(),                              // 'timestamp' (Long मिलिसेकेन्ड नम्बर)
+      totalPrice: parseInt(totalAmount),                  // 'totalPrice' (Integer कुल रकम)
+      note: cookingNote.length > 0 ? cookingNote : null,  // 'note' (खाली भए null)
+      items: itemsListForAndroid                          // 'items' एरे लिस्ट
+    };
+
+    // Firebase को 'orders' नोड भित्र push गर्ने (.json स्वचालित रूपमा बुझ्छ)
+    database.ref('orders').push(finalFirebaseOrder)
+      .then(() => {
+        // अर्डर सफल भएपछि सफलता स्क्रिन देखाउने
+        toggleCartDrawer(false);
+        document.getElementById('successScreen').classList.add('show');
+      })
+      .catch((error) => {
+        btn.disabled = false;
+        btn.innerText = "PLACE ORDER 🔥";
+        errBox.innerText = `त्रुटि भयो: ${error.message}`;
+        errBox.classList.add('show');
+      });
   }
 
-  window.changeQty = changeQty;
-  window.openDrawer = openDrawer;
-  window.closeDrawer = closeDrawer;
-  window.placeOrder = placeOrder;
-  window.resetOrder = resetOrder;
-  window.showCat = showCat;
-  window.searchMenu = searchMenu;
+  // अर्डर सफल भएपछि मेनु काउन्टरहरू रिसेट गर्ने
+  function resetMenuAfterOrder() {
+    cart = {};
+    document.querySelectorAll('.qty-num').forEach(span => span.innerText = '0');
+    document.getElementById('orderNote').value = '';
+    updateCartBar();
+    document.getElementById('successScreen').classList.remove('show');
+    document.getElementById('submitOrderBtn').disabled = false;
+    document.getElementById('submitOrderBtn').innerText = "PLACE ORDER 🔥";
+  }
 </script>
+
 </body>
 </html>
