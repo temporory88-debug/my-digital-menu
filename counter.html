@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Light Cafe - Counter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --gold: #C9A84C;
+            --gold2: #E8C96A;
+            --bg: #0a0a0a;
+            --card: #161616;
+            --text: #f0e6c8;
+            --dim: #777;
+            --green: #22c55e;
+            --orange: #f97316;
+            --red: #ef4444;
+            --blue: #3b82f6;
+        }
+        body { background: var(--bg); font-family: 'Poppins', sans-serif; color: var(--text); min-height: 100vh; }
+        
+        /* TOP BAR */
+        .topbar { background: linear-gradient(135deg, #1a1200 0%, #0a0800 100%); border-bottom: 2px solid var(--gold); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; min-height: 70px; }
+        .topbar-logo { display: flex; align-items: center; gap: 12px; }
+        .moon-icon { font-size: 28px; }
+        .cafe-title-wrap { line-height: 1.2; }
+        .cafe-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 900; color: var(--gold); letter-spacing: .08em; }
+        .cafe-tagline { font-size: 9px; color: var(--dim); letter-spacing: .15em; text-transform: uppercase; }
+        .topbar-center { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .live-badge { display: flex; align-items: center; gap: 6px; background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); border-radius: 20px; padding: 4px 12px; }
+        .live-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)} 70%{box-shadow:0 0 0 7px rgba(34,197,94,0)} }
+        .live-txt { font-size: 11px; color: var(--green); font-weight: 700; letter-spacing: .1em; }
+        .clock { font-size: 11px; color: var(--dim); letter-spacing: .05em; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .voice-btn { background: rgba(201,168,76,.15); border: 1px solid var(--gold); border-radius: 8px; padding: 5px 10px; font-size: 11px; color: var(--gold); font-weight: 600; cursor: pointer; transition: background .2s; white-space: nowrap; }
+        .voice-btn:hover { background: rgba(201,168,76,.25); }
+        .voice-btn.muted { border-color: #444; color: var(--dim); background: transparent; }
+        .bell-wrap { position: relative; }
+        .bell { font-size: 22px; cursor: pointer; display: block; }
+        .bell.ring { animation: ring .4s ease 3; }
+        @keyframes ring { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-18deg)} 75%{transform:rotate(18deg)} }
+        .bell-count { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 9px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; }
+        .bell-count.show { display: flex; }
+
+        /* STATS */
+        .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 14px 16px 0; }
+        .stat { background: var(--card); border: 1px solid #2a2a2a; border-radius: 10px; padding: 12px; text-align: center; }
+        .stat-num { font-size: 24px; font-weight: 700; color: var(--gold); }
+        .stat-lbl { font-size: 10px; color: var(--dim); margin-top: 2px; }
+
+        /* FILTERS */
+        .filters { display: flex; gap: 8px; padding: 12px 16px 0; flex-wrap: wrap; }
+        .ftab { padding: 5px 13px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid #333; background: var(--card); color: var(--dim); cursor: pointer; transition: all .2s; }
+        .ftab.active { background: var(--gold); color: #000; border-color: var(--gold); }
+
+        /* ORDERS CONTAINER */
+        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 12px; padding: 12px 16px 30px; }
+        .empty { text-align: center; padding: 60px 20px; color: var(--dim); grid-column: 1/-1; }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .order-card { background: var(--card); border-radius: 12px; border: 1px solid #2a2a2a; overflow: hidden; animation: slideIn .3s ease; transition: transform .2s, box-shadow .2s; }
+        .order-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+        @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+        
+        .order-card.new { border-color: var(--orange); }
+        .order-card.preparing { border-color: var(--blue); }
+        .order-card.done { border-color: var(--green); opacity: .7; }
+        
+        .card-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #222; }
+        .card-head.new { background: rgba(249,115,22,.08); }
+        .card-head.preparing { background: rgba(59,130,246,.08); }
+        .card-head.done { background: rgba(34,197,94,.08); }
+        
+        .tbl-num { font-size: 16px; font-weight: 700; color: var(--gold); }
+        .ord-id { font-size: 9px; color: var(--dim); margin-top: 1px; }
+        .status-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+        .s-new { background: var(--orange); color: #fff; }
+        .s-prep { background: var(--blue); color: #fff; }
+        .s-done { background: var(--green); color: #fff; }
+        
+        .card-body { padding: 10px 14px; }
+        .ord-row { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 0; }
+        .ord-name { color: var(--text); flex: 1; }
+        .ord-qty { color: var(--dim); margin: 0 6px; }
+        .ord-price { color: var(--gold); font-weight: 600; }
+        .ord-note { background: #1a1400; border: 1px solid #2a2000; border-radius: 6px; padding: 6px 8px; font-size: 10px; color: #f0c060; margin-top: 6px; }
+        
+        .card-foot { padding: 8px 14px; border-top: 1px solid #222; display: flex; align-items: center; justify-content: space-between; }
+        .ord-total { font-size: 13px; font-weight: 700; color: var(--gold); }
+        .ord-time { font-size: 9px; color: var(--dim); margin-top: 2px; }
+        .act-btns { display: flex; gap: 5px; }
+        .act-btn { padding: 5px 12px; border-radius: 7px; font-size: 10px; font-weight: 700; border: none; cursor: pointer; transition: opacity .2s; }
+        .act-btn:hover { opacity: .85; }
+        .btn-prep { background: var(--blue); color: #fff; }
+        .btn-done { background: var(--green); color: #fff; }
+        .btn-del { background: #2a2a2a; color: var(--dim); }
+
+        /* VOICE TOAST */
+        .toast { position: fixed; top: 78px; right: 16px; background: linear-gradient(135deg, #1a1200, #2a1f00); border: 1px solid var(--gold); color: var(--text); padding: 14px 16px; border-radius: 12px; font-size: 12px; font-weight: 600; transform: translateX(120%); transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 999; max-width: 270px; box-shadow: 0 4px 24px rgba(0,0,0,.5); }
+        .toast.show { transform: translateX(0); }
+        .toast-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .toast-bell { font-size: 20px; }
+        .toast-title { font-family: 'Cinzel', serif; color: var(--gold); font-size: 13px; }
+        .toast-body { font-size: 11px; color: var(--dim); line-height: 1.5; }
+        .toast-table { font-size: 14px; font-weight: 700; color: var(--gold2); margin-bottom: 2px; }
+
+        @media(max-width:600px) {
+            .stats { grid-template-columns: repeat(2,1fr); }
+            .orders-grid { grid-template-columns: 1fr; }
+            .cafe-tagline { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <div class="topbar-logo">
+            <span class="moon-icon">🌙</span>
+            <div class="cafe-title-wrap">
+                <div class="cafe-title">Moon Light Cafe</div>
+                <div class="cafe-tagline">Good Coffee · Good Food · Good Moments</div>
+            </div>
+        </div>
+        <div class="topbar-center">
+            <div class="live-badge">
+                <span class="live-dot"></span>
+                <span class="live-txt">LIVE</span>
+            </div>
+            <div class="clock" id="clock">--:--:--</div>
+        </div>
+        <div class="topbar-right">
+            <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">🔊 Voice ON</button>
+            <div class="bell-wrap">
+                <span class="bell" id="bell">🔔</span>
+                <span class="bell-count" id="bell-count">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat"><div class="stat-num" id="s-new">0</div><div class="stat-lbl">🔥 नयाँ</div></div>
+        <div class="stat"><div class="stat-num" id="s-prep">0</div><div class="stat-lbl">👨‍🍳 बनाउँदै</div></div>
+        <div class="stat"><div class="stat-num" id="s-done">0</div><div class="stat-lbl">✅ सकियो</div></div>
+        <div class="stat"><div class="stat-num" id="s-rev">Rs.0</div><div class="stat-lbl">💰 आजको</div></div>
+    </div>
+
+    <div class="filters">
+        <div class="ftab active" onclick="setFilter('all', this)">📋 सबै</div>
+        <div class="ftab" onclick="setFilter('new', this)">🔥 नयाँ</div>
+        <div class="ftab" onclick="setFilter('preparing', this)">👨‍🍳 बनाउँदै</div>
+        <div class="ftab" onclick="setFilter('done', this)">✅ सकियो</div>
+    </div>
+
+    <div class="orders-grid" id="orders-grid">
+        <div class="empty" id="empty">
+            <div class="empty-icon">📭</div>
+            <div style="font-size:14px;margin-bottom:6px">अहिले कुनै order छैन</div>
+            <div style="font-size:11px">Customer ले QR scan गरेपछि यहाँ देखिन्छ</div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <div class="toast-header">
+            <span class="toast-bell">🔔</span>
+            <span class="toast-title">नयाँ Order आयो!</span>
+        </div>
+        <div class="toast-table" id="toast-table">📍 Table 1</div>
+        <div class="toast-body" id="toast-body"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAohDLMyfCo0Mivw99agloetfxPYrRcHPo",
+            authDomain: "my-restaurant-qr.firebaseapp.com",
+            databaseURL: "https://my-restaurant-qr-default-rtdb.firebaseio.com",
+            projectId: "my-restaurant-qr",
+            storageBucket: "my-restaurant-qr.firebasestorage.app",
+            messagingSenderId: "67721943429",
+            appId: "1:67721943429:web:392ec74551af0ef67a0cec"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let allOrders = {};
+        let currentFilter = 'all';
+        let isFirstLoad = true;
+        let voiceOn = true;
+
+        // Voice Engine Voice Synthesis Announcement
+        function announce(order) {
+            if (!voiceOn || !window.speechSynthesis) return;
+            const items = order.items || [];
+            const itemText = items.map(i => `${i.qty} ${i.name}`).join(', ');
+            const text = `New order from Table number ${order.tableNumber}. ${itemText}.`;
+            
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'en-US';
+            utter.rate = 0.9;
+            
+            playBeep();
+            setTimeout(() => speechSynthesis.speak(utter), 500);
+        }
+
+        function playBeep() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+                [0, 150].forEach((delay, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.value = i === 1 ? 1046 : 880;
+                    gain.gain.setValueAtTime(0, ctx.currentTime + delay/1000);
+                    gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + delay/1000 + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay/1000 + 0.25);
+                    osc.start(ctx.currentTime + delay/1000);
+                    osc.stop(ctx.currentTime + delay/1000 + 0.3);
+                });
+            } catch(e) { console.log("Audio Context Blocked context: ", e); }
+        }
+
+        window.toggleVoice = () => {
+            voiceOn = !voiceOn;
+            const btn = document.getElementById('voice-btn');
+            if (voiceOn) {
+                btn.textContent = '🔊 Voice ON';
+                btn.classList.remove('muted');
+            } else {
+                btn.textContent = '🔇 Voice OFF';
+                btn.classList.add('muted');
+            }
+        };
+
+        function showToast(order) {
+            const items = order.items || [];
+            document.getElementById('toast-table').textContent = `📍 Table ${order.tableNumber}`;
+            document.getElementById('toast-body').textContent = items.map(i => `${i.name} × ${i.qty}`).join(', ');
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 5000);
+
+            const bell = document.getElementById('bell');
+            bell.classList.remove('ring');
+            void bell.offsetWidth; 
+            bell.classList.add('ring');
+
+            announce(order);
+        }
+
+        // Real-time Firebase Synchronization
+        onValue(ref(db, 'orders'), (snapshot) => {
+            const prevKeys = Object.keys(allOrders);
+            allOrders = {};
+            snapshot.forEach(child => {
+                allOrders[child.key] = { id: child.key, ...child.val() };
+            });
+
+            if (!isFirstLoad) {
+                const newKeys = Object.keys(allOrders).filter(k => !prevKeys.includes(k));
+                newKeys.forEach(k => {
+                    if (allOrders[k].status === 'new') showToast(allOrders[k]);
+                });
+            }
+            isFirstLoad = false;
+            render();
+        });
+
+        function render() {
+            const grid = document.getElementById('orders-grid');
+            let list = Object.values(allOrders)
+                .filter(o => currentFilter === 'all' || o.status === currentFilter)
+                .sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            const all = Object.values(allOrders);
+            document.getElementById('s-new').textContent = all.filter(o => o.status === 'new').length;
+            document.getElementById('s-prep').textContent = all.filter(o => o.status === 'preparing').length;
+            document.getElementById('s-done').textContent = all.filter(o => o.status === 'done').length;
+            
+            const revenue = all.filter(o => o.status === 'done').reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+            document.getElementById('s-rev').textContent = 'Rs.' + revenue;
+
+            const newCount = all.filter(o => o.status === 'new').length;
+            const bc = document.getElementById('bell-count');
+            bc.textContent = newCount;
+            newCount > 0 ? bc.classList.add('show') : bc.classList.remove('show');
+
+            if (list.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">📭</div>
+                        <div style="font-size:14px;margin-bottom:6px">अहिले कुनै अर्डर छैन</div>
+                        <div style="font-size:11px">Customer ले QR scan गरेपछि यहाँ देखिन्छ</div>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = list.map(o => {
+                const time = o.timestamp ? new Date(o.timestamp).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+                const items = (o.items || []).map(i => `
+                    <div class="ord-row">
+                        <span class="ord-name">${i.name}</span>
+                        <span class="ord-qty">×${i.qty}</span>
+                        <span class="ord-price">Rs.${i.qty * i.price}</span>
+                    </div>
+                `).join('');
+                
+                const note = o.note ? `<div class="ord-note">💬 ${o.note}</div>` : '';
+                
+                let badge = `<span class="status-badge s-new">🔥 नयाँ</span>`;
+                let actions = `<button class="act-btn btn-prep" onclick="changeStatus('${o.id}','preparing')">👨‍🍳 बनाउँदै</button>`;
+                
+                if (o.status === 'preparing') {
+                    badge = `<span class="status-badge s-prep">👨‍🍳 बनाउँदै</span>`;
+                    actions = `<button class="act-btn btn-done" onclick="changeStatus('${o.id}','done')">✅ सकियो</button>`;
+                } else if (o.status === 'done') {
+                    badge = `<span class="status-badge s-done">✅ सकियो</span>`;
+                    actions = `<button class="act-btn btn-del" onclick="deleteOrder('${o.id}')">🗑 हटाउ</button>`;
+                }
+
+                return `
+                    <div class="order-card ${o.status}">
+                        <div class="card-head ${o.status}">
+                            <div>
+                                <div class="tbl-num">📍 Table ${o.tableNumber}</div>
+                                <div class="ord-id">#${o.id.slice(-6).toUpperCase()}</div>
+                            </div>
+                            ${badge}
+                        </div>
+                        <div class="card-body">${items}${note}</div>
+                        <div class="card-foot">
+                            <div>
+                                <div class="ord-total">Rs. ${o.totalPrice}</div>
+                                <div class="ord-time">⏰ ${time}</div>
+                            </div>
+                            <div class="act-btns">${actions}</div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        window.changeStatus = async (id, status) => {
+            await update(ref(db, `orders/${id}`), { status });
+        };
+
+        window.deleteOrder = async (id) => {
+            if (confirm('यो अर्डर हटाउने हो?')) {
+                await remove(ref(db, `orders/${id}`));
+            }
+        };
+
+        window.setFilter = (f, el) => {
+            currentFilter = f;
+            document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            render();
+        };
+
+        setInterval(() => {
+            document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        }, 1000);
+    </script>
+</body>
+</html>
